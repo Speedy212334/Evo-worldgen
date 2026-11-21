@@ -32,9 +32,21 @@ jobs:
             exit 1
           fi
 
-          # Replace the old source tree, so removed third-party schematic scripts
-          # and stale files do not survive an upgrade from the previous baseline.
-          git clean -fdx -e .github/
+          # Replace the complete prior working tree while preserving Git metadata,
+          # this workflow, and the archive being verified.
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+
+          keep = {".git", ".github", "EvolutionWorldGen-26.3-Alpha4.4-Original-Voxel-Structures-Source.zip"}
+          for path in Path(".").iterdir():
+              if path.name in keep:
+                  continue
+              if path.is_dir():
+                  shutil.rmtree(path)
+              else:
+                  path.unlink()
+          PY
 
           python3 - <<'PY'
           from pathlib import Path, PurePosixPath
