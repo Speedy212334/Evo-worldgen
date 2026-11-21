@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "EvolutionWorldGen-26.3-Alpha4.2-Natural-Spawn-Platform-Source.zip"
+  workflow_dispatch:
 
 permissions:
   contents: write
