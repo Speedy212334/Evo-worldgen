@@ -2,32 +2,34 @@
 
 This is the canonical repository for EvolutionWorldGen development.
 
-## Current source handoff: Alpha4.5 — Vanilla Locate Preflight
+## Current source handoff: Alpha4.6 — Locator and Structure Quality
 
-The current package is **EvolutionWorldGen 26.3 Alpha4.5 — Vanilla Locate Preflight**. It retains all 41 original block-by-block structure NBT builds and the approved natural Evolution Nexus, and aligns the custom structure-placement preflight with Minecraft 26.3's native `/locate structure` search.
+The current package is **EvolutionWorldGen 26.3 Alpha4.6**. It retains all 41 original procedural Minecraft NBT builds, refines the Evolution Nexus, strengthens 16 weaker architectural silhouettes, removes the shared generic End island shell, and extends static tests for vanilla `/locate structure` compatibility.
 
-1. Download the exact Alpha4.5 source ZIP provided in the conversation.
+1. Download the exact Alpha4.6 source ZIP provided in the conversation.
 2. On GitHub, open **Add file → Upload files** in this repository.
 3. Upload the ZIP at the repository root with this exact filename:
-   `EvolutionWorldGen-26.3-Alpha4.5-Vanilla-Locate-Preflight-Source.zip`
+   `EvolutionWorldGen-26.3-Alpha4.6-Locator-and-Structure-Quality-Source.zip`
 4. Commit the upload to `main`.
 
-The `.github/workflows/import-alpha45.yml` workflow verifies the archive SHA-256, replaces the prior project tree, safely extracts the project files, removes the uploaded ZIP from the working tree, and commits the complete source into the repository.
+The `.github/workflows/import-alpha46.yml` workflow verifies the archive SHA-256, replaces the previous project tree, safely extracts the full source, removes the uploaded ZIP from the working tree, and commits the project files.
 
 Expected SHA-256:
 
-`bff03ed453e9a91866dc1e1f939d148169a962f70796f491032dbe9f4f89ce1e`
+`4cae55ac668f2b32b2bbd9da850a492082ca57dd493099151344a95278d28f49`
 
-If the workflow cannot push because repository Actions permissions are read-only, open **Settings → Actions → General → Workflow permissions** and enable **Read and write permissions**, then rerun the Alpha4.5 import workflow from the **Actions** tab.
+If the workflow cannot push because repository Actions permissions are read-only, open **Settings → Actions → General → Workflow permissions** and enable **Read and write permissions**, then rerun the Alpha4.6 import workflow from the **Actions** tab.
 
-## What Alpha4.5 fixes
+## Locator implementation
 
-- Minecraft 26.3's native nearest-structure search scans concentric-ring and random-spread placement classes. All 41 EvolutionWorldGen IDs now use one of those locator-compatible classes.
-- The fixed-origin Nexus and Dragon's Crown still generate only at their exact `(0,0)` chunk. Their additional-chunk-restriction preflight now rejects every off-origin candidate before `/locate` needs to inspect or load it.
-- The 15 bounded Overworld random-spread structures now apply their full-footprint `-10,000..+10,000` envelope during locator preflight as well as actual generation. Candidate chunks outside the allowed envelope are rejected before chunk inspection.
-- The 24 vanilla random-spread structures keep vanilla seed/salt candidate calculation and behaviour.
-- All 41 command IDs appear exactly once in `LOCATE-COMMANDS.txt`.
+All 41 structures use placement classes recognised by Minecraft 26.3's nearest-structure search: 24 vanilla random-spread, 15 bounded random-spread subclasses and 2 fixed-origin random-spread subclasses. The fixed Nexus and Dragon's Crown remain at `(0,0)` in their respective dimensions. Both custom placements apply the same preflight restrictions as generation; both codecs inherit vanilla common placement fields including locate offsets.
 
-## Validation status
+## Structure quality
 
-Static structure-template, content, registry, tree-feature, spawn-bootstrap, and 4,216 locator-preflight regression assertions pass in the preparation environment. This does **not** certify a Java 25 / Gradle 9.9.1 build, registry loading, or live Minecraft 26.3 `/locate` results. Runtime testing is still required before production use.
+Alpha4.6 adds family-specific vertical architecture to 16 weak/flat silhouettes and removes the universal generic floating-island shell under all End structures. Each End family now has its own island, bridge, ruin-cluster or district footprint. The Nexus keeps the 25×7×25 platform and unobstructed 7×7 arrival centre, with additional weathered details and approach markers.
+
+## Static validation status
+
+Static audits pass: 3,119 locator/worldgen assertions; 41/41 structure NBT templates; 120/120 loot chest support/headroom checks; 41 unique architecture profiles/recipes; 16 family-specific NBT massing profiles; tree features; and 11 spawn-bootstrap assertions.
+
+This does **not** certify a Java 25 / Gradle 9.9.1 build, registry loading or live Minecraft 26.3 `/locate` behaviour. Those remain required before production deployment.
