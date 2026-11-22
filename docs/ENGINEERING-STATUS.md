@@ -1,60 +1,52 @@
-# EvolutionWorldGen engineering status — Alpha4.4
+# EvolutionWorldGen engineering status — Alpha4.5
 
-## Current prepared source
+## Current source snapshot
 
-- Target: Minecraft Java 26.3, Fabric Loader 0.20.1, Fabric API 0.166.2+26.3.
-- Toolchain target: Java 25 and Gradle wrapper 9.9.1.
-- Source package: **Alpha4.4 — Original Voxel Structures**.
-- Archive SHA-256: a3c10935e4d3e48d32744e13ba67a1ad14621f0364e88e55a01efd84fa024536.
-- Repository is prepared with an Alpha4.4 import workflow; the project source will only enter main after the exact archive is uploaded and that workflow completes.
+- Version: `0.1.0-alpha.4.5`.
+- Minecraft Java 26.3 / Fabric Loader 0.20.1 / Fabric API 0.166.2+26.3.
+- Java 25 / Gradle wrapper 9.9.1 target.
+- Archive SHA-256: `bff03ed453e9a91866dc1e1f939d148169a962f70796f491032dbe9f4f89ce1e`.
+- Repository handoff workflow is ready; the full source enters `main` only after the exact ZIP is uploaded and the workflow completes.
 
-## Implemented structure work
+## Vanilla `/locate` parity
 
-- All 41 structure-template NBT assets are original, block-by-block procedural layouts, each with a unique family recipe and distinct NBT hash.
-- The 40 non-Nexus structure families have been rebuilt to interpret the approved Overworld, Nether and End visual concepts. No old external survival-base schematic candidate or downloader is used.
-- The Evolution Nexus retains the approved compact 25×7×25 spawn platform and unobstructed 7×7 centre, with additional stone/moss/lantern detailing.
-- Dragon's Crown receives outer broken-arch and underside fragments while retaining the ten vanilla crystal/tower positions and central dragon-fight area.
-- Geometry refinements remove the flat-pad appearance from the Lost Underground City, Cliffside Outposts, Ruined Settlements, Forest Waystations, Ashen Capital and Ruined Nether Cities.
-- End structures and buildings are aligned to their actual floating-island/deck levels.
-- All 120 loot chests are placed on solid support blocks with two clear blocks above.
+Minecraft 26.3's `ChunkGenerator.findNearestMapStructure` dispatches nearest-structure searches only for `ConcentricRingsStructurePlacement` and `RandomSpreadStructurePlacement`. It asks each placement for potential candidates on a square-ring grid. For each candidate, `StructureCheck.checkStart` calls `applyAdditionalChunkRestrictions` before biome/start validation and before the locator loads a candidate chunk to `STRUCTURE_STARTS` if further confirmation is needed.
 
-## Placement and locate contract
+Alpha4.5 aligns custom restrictions with that flow:
 
-- The Alpha4.3 fixed-origin placement adapter remains in place. It makes the Evolution Nexus and Dragon's Crown discoverable to vanilla's nearest-structure placement search without allowing generation away from their exact (0,0) origin chunks.
-- The other 39 naturally distributed structure families retain their existing seed-and-salt random-spread placement settings.
-- Expected vanilla commands:
-  - /locate structure evolutionworldgen:evolution_nexus
-  - /locate structure evolutionworldgen:dragons_crown
-  - /locate structure evolutionworldgen:grand_bridges
+- Fixed-origin placement remains a `RandomSpreadStructurePlacement` subclass. Its locator-grid cell maps to the exact configured fixed chunk; its new preflight accepts only that chunk and preserves the parent restriction. The generation-time `isPlacementChunk` check still enforces the same exact origin.
+- Bounded Overworld placement remains a `RandomSpreadStructurePlacement` subclass. Its new preflight now checks the exact same full-footprint block-coordinate envelope as generation, using overflow-safe chunk-to-block conversion.
+- Standard vanilla random-spread placements retain their vanilla seed/salt calculation and locator path.
 
-## Static verification completed
+Coverage: 24 vanilla random-spread + 15 bounded random-spread + 2 fixed-origin random-spread = 41 structures.
 
-- 41/41 NBT templates validate: dimensions, bounds, DataVersion 5023 palette schema, palette references, anchor metadata, loot-table binding and unique hashes.
-- 40 structures have three distinct family-bound loot chests; the Nexus has none.
-- All 120 loot chests pass the solid-support and headroom audit.
-- 41 unique architecture/silhouette records and 41 distinct procedural recipes pass the content audit.
-- 2,068 world-generation registry assertions pass across 41 structures, pools, sets, biome tags, salts and Overworld footprint bounds.
-- Tall-tree feature audit passes.
-- Spawn bootstrap audit passes (11 assertions).
-- Python source scripts pass syntax compilation.
-- The final source ZIP passes its archive integrity test.
-- All 41 structure NBT assets differ from the Alpha4.3 baseline.
+## Static checks passed
+
+- 41 structure definitions, 41 pools and 41 structure sets match the catalogue.
+- All 41 IDs are listed exactly once in `LOCATE-COMMANDS.txt`.
+- All placement types are recognised by Minecraft 26.3's locator dispatch.
+- Fixed-origin grid search is tested at positive and negative coordinates up to the normal 100-grid-sector search radius.
+- Fixed-origin preflight is restricted to the exact origin chunk.
+- All 15 bounded Overworld placements pass first/last in-bounds candidate checks and reject candidates immediately beyond all four bounds.
+- 4,216 worldgen registry/locator-preflight assertions pass.
+- All 41 structure NBT templates, content audit, tall-tree audit and 11 spawn-bootstrap assertions pass.
+- The Alpha4.5 source archive passes ZIP integrity validation.
 
 These are static/source-level checks only.
 
 ## Not yet verified
 
-- No Java 25 / Gradle 9.9.1 build or Alpha4.4 JAR has been produced.
-- No Minecraft 26.3 registry-load or disposable-world generation session has been completed for Alpha4.4.
-- No live vanilla /locate structure tests have been completed with the Alpha4.4 JAR.
-- The full terrain/footprint sampler remains unconnected to the live Fabric structure-start pipeline; full-footprint slope, burial, collision and fluid eligibility therefore still need implementation and runtime validation.
-- Loot accessibility, interior pathing, large-structure terrain fit and Dragon's Crown gameplay interactions require in-game review.
+- No Java 25 / Gradle 9.9.1 build or Alpha4.5 JAR has been produced.
+- No Minecraft 26.3 registry-load or disposable-world session has been completed for Alpha4.5.
+- No live `/locate structure` tests have been completed with the Alpha4.5 JAR.
+- Vanilla `/locate` still checks biome/start eligibility and may inspect candidate chunks to `STRUCTURE_STARTS`; players do not need to pre-explore destination chunks.
+- Full terrain/footprint slope, burial, collision and fluid sampling remains unconnected to the live Fabric structure-start pipeline.
 
 ## Preserved requirements
 
-- Evolution Nexus at Overworld (0,0) in the Plains biome family, clear safe player-arrival area.
-- All Overworld structures fully within inclusive X/Z bounds -10,000..+10,000, including footprint and margins.
-- Terrain-conditioned placement must not force structures into unsuitable biomes, elevation, slopes, fluids or footprints.
-- Structures must not overlap. Nether and End bounds are handled separately.
-- Preserve the central End dragon fight, exit portal and outer gateways.
-- All future structure redesigns should use distinct original voxel compositions, not reused generic schematics.
+- Evolution Nexus at Overworld `(0,0)` in the Plains biome family, with the approved 25×7×25 platform and clear 7×7 arrival centre.
+- Dragon's Crown at End `(0,0)`, preserving the vanilla dragon fight, exit portal and gateways.
+- Every Overworld structure fully inside inclusive X/Z bounds -10,000..+10,000, including its footprint and margins.
+- Terrain-conditioned placement must not force structures into unsuitable biome, elevation, slope, fluid or footprint conditions.
+- Structures must not overlap. Nether and End bounds remain separately configured.
+- Vanilla `/locate structure evolutionworldgen:<id>` remains the intended lookup interface.
